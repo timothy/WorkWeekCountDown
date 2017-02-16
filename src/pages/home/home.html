@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Time until Weekend: Decimal{{time.decimal.toFixed(2)}}
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-card *ngFor="let day of days">
+    <ion-card-header style="background-color: antiquewhite;">
+      {{day.day}}
+    </ion-card-header>
+
+    <ion-list>
+      <ion-item>
+        <ion-label>Start Time</ion-label>
+        <ion-datetime displayFormat="h:mm a" (ionChange)="calcStartEndTime(day.index)" [(ngModel)]="day.startDate"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>End Time</ion-label>
+        <ion-datetime displayFormat="h:mm a" (ionChange)="calcStartEndTime(day.index)" [(ngModel)]="day.endDate"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Time worked hours/min</ion-label>
+        <ion-datetime displayFormat="h:mm" (ionChange)="CalcTime(day.index)" [(ngModel)]="day.hm"></ion-datetime>
+      </ion-item>
+
+      <ion-item>
+        <ion-input type="number" placeholder="Decimal time Input" [(ngModel)]="day.decimalTime"></ion-input>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+</ion-content>
