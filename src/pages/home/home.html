@@ -25,13 +25,20 @@
 
       <ion-item>
         <ion-label>Time worked hours/min</ion-label>
-        <ion-datetime displayFormat="h:mm" (ionChange)="CalcTime(day.index)" [(ngModel)]="day.hm"></ion-datetime>
+        <ion-datetime displayFormat="H:mm" (ionChange)="CalcTime(day.index)" [(ngModel)]="day.hm"></ion-datetime>
       </ion-item>
 
       <ion-item>
-        <ion-input type="number" placeholder="Decimal time Input" [(ngModel)]="day.decimalTime"></ion-input>
+        <ion-input type="number" placeholder="Decimal time Input" (ngModelChange)="calcDecTime(day.index)" [(ngModel)]="day.decimalTime"></ion-input>
       </ion-item>
     </ion-list>
   </ion-card>
 
 </ion-content>
+
+<ion-card *ngFor="let day of days">
+      <ion-item>
+        <ion-label>Time worked hours/min</ion-label>
+        <ion-datetime displayFormat="H:mm" (ionChange)="CalcTime(day.index)" [(ngModel)]="day.hm"></ion-datetime>
+      </ion-item>
+</ion-card>
