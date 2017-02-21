@@ -5,6 +5,7 @@ import {TotalTime} from "./types";
 //import {Validate} from "../../classes/NumValidator";
 import {ConvertTime} from "../../classes/ConvertTime";
 
+enum T {hour, min}//used when time is split
 
 @Component({
   selector: 'page-home',
@@ -22,7 +23,7 @@ export class HomePage {
   constructor(public navCtrl: NavController) {
     console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
-      this.days.push({day: this.DOW[i], hm: 0, decimalTime: 0, index: i});
+      this.days.push({day: this.DOW[i], hm: '', decimalTime: 0, index: i});
       this.oldTime.push(0);
     }
   }
@@ -36,7 +37,7 @@ export class HomePage {
     this.days[index].endDate = null;
     this.days[index].startDate = null;
 
-
+    this.days[index].hm = ConvertTime.Dec2IsoStrTime(this.days[index].decimalTime);
 
     console.log(this.days[index].decimalTime);
     console.log("this.days[index].decimalTime");
@@ -51,9 +52,12 @@ export class HomePage {
    * @param index the index of the day array that is to be edited
    */
   CalcTime(index: number) {
+
     //clear start and end times... does not make sense to keep them user manually inputs time amount
     this.days[index].endDate = null;
     this.days[index].startDate = null;
+
+    this.days[index].decimalTime = ConvertTime.ISO2Dec(this.days[index].hm);
 
     console.log(this.days[index].hm);
     console.log("this.days[index].hm");
@@ -80,34 +84,27 @@ export class HomePage {
 
       console.log(start);
       console.log(end);
-      const hour = 0;
-      const min = 1;
+
       //if start time is less then end time
-      if (start[hour] < end[hour] || (start[hour] === end[hour] && start[min] < end[min])) {
+      if (start[T.hour] < end[T.hour] || (start[T.hour] === end[T.hour] && start[T.min] < end[T.min])) {
         console.log("++++++++++++++++++++++++++Validation***************************");
 
         //if start min is more then end min then one hour needs to be subtracted from end
-        if (end[hour] > start[hour] && end[min] < start[min]) {
-          totalHR = (end[hour] - 1) - start[hour];
-          totalMN = (end[min] + 60) - start[min];
+        if (end[T.hour] > start[T.hour] && end[T.min] < start[T.min]) {
+          totalHR = (end[T.hour] - 1) - start[T.hour];
+          totalMN = (end[T.min] + 60) - start[T.min];
         } else {
-          totalHR = end[hour] - start[hour];
-          totalMN = end[min] - start[min];
+          totalHR = end[T.hour] - start[T.hour];
+          totalMN = end[T.min] - start[T.min];
         }
 
         console.log(totalHR + ':' + totalMN);
-        //needs to be 2 digits
-        if (totalHR.toString().length === 1) {
-          totalHR = '0' + totalHR.toString();
-        }
-        //needs to be 2 digits
-        if (totalMN.toString().length === 1) {
-          totalMN = '0' + totalMN.toString();
-        }
+
+        let isoTime:string = ConvertTime.HrMn2ISOFormat(totalHR,totalMN);
 
         //calc all
-        console.log(totalHR + ':' + totalMN);
-        this.days[index].hm = totalHR + ':' + totalMN;
+        console.log(isoTime);
+        this.days[index].hm = isoTime;
         this.days[index].decimalTime = ConvertTime.HourMin2Dec(Number(totalHR),Number(totalMN));
         //TODO: Calc end totals
 
