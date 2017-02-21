@@ -93,4 +93,19 @@ export class ConvertTime {
 
     return hour + ':' + min;
   }
+
+  /**
+   * ISO Time is in the format of hh:mm i.e. '05:09'
+   * this method will convert ISO time into decimal time so from 05:09 to 5.15
+   * @param hhmm {string} ISO format string hh:mm i.e. '05:09'
+   * @returns {number} time in decimal format 5.15
+   * @constructor
+   */
+ static ISO2Dec(hhmm: string): number {
+    let time: any[] = hhmm.split(":");
+    const hour:number = 0, min:number = 1;
+
+    return Number(time[hour]) + Number(time[min]) / 60;
+  }
+
 }
