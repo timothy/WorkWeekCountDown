@@ -2,8 +2,7 @@ import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 //
 import {TotalTime} from "./types";
-//import {Validate} from "../../classes/NumValidator";
-import {ConvertTime} from "../../classes/ConvertTime";
+import {ISOTime} from "../../classes/ISOTime";
 
 enum T {hour, min}//used when time is split
 
@@ -14,17 +13,17 @@ enum T {hour, min}//used when time is split
 export class HomePage {
   readonly DOW: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   readonly week: number = 7;
-  oldTime: number[] = [];
+  oldTime: string[] = [];
 
   //---variables below are used in the view---
   days: Array<any> = [];
-  time: TotalTime = {decimal: 40, hours: 40, min: 0};
+  time: TotalTime = {decimal: 40, hhmm: '40:00'};
 
   constructor(public navCtrl: NavController) {
     console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
-      this.days.push({day: this.DOW[i], hm: '', decimalTime: 0, index: i});
-      this.oldTime.push(0);
+      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+      this.oldTime.push('');
     }
   }
 
@@ -37,13 +36,13 @@ export class HomePage {
     this.days[index].endDate = null;
     this.days[index].startDate = null;
 
-    this.days[index].hm = ConvertTime.Dec2IsoStrTime(this.days[index].decimalTime);
+    this.days[index].hhmm = ISOTime.Dec2ISO(this.days[index].decimalTime);
 
     console.log(this.days[index].decimalTime);
     console.log("this.days[index].decimalTime");
 
     //Calculate end totals with new subtracted amount
-    //this.calcEndTotals(index);
+    this.calcEndTotals(index);
   }
 
   /**
@@ -57,14 +56,13 @@ export class HomePage {
     this.days[index].endDate = null;
     this.days[index].startDate = null;
 
-    this.days[index].decimalTime = ConvertTime.ISO2Dec(this.days[index].hm);
+    this.days[index].decimalTime = ISOTime.ISO2Dec(this.days[index].hhmm);
 
-    console.log(this.days[index].hm);
-    console.log("this.days[index].hm");
-    //this.days[index].hm.split("");
+    console.log(this.days[index].hhmm);
+    console.log("this.days[index].hhmm");
 
     //Calculate end totals with new subtracted amount
-    //this.calcEndTotals(index);
+    this.calcEndTotals(index);
   }
 
   /**
@@ -79,8 +77,8 @@ export class HomePage {
     let end: number[];
 
     if (this.days[index].startDate && this.days[index].endDate) {
-      start = this.days[index].startDate.split(":");
-      end = this.days[index].endDate.split(":");
+      start = ISOTime.SplitTime(this.days[index].startDate);
+      end = ISOTime.SplitTime(this.days[index].endDate);
 
       console.log(start);
       console.log(end);
@@ -100,12 +98,12 @@ export class HomePage {
 
         console.log(totalHR + ':' + totalMN);
 
-        let isoTime:string = ConvertTime.HrMn2ISOFormat(totalHR,totalMN);
+        let isoTime: string = ISOTime.HrMn2ISOFormat(totalHR, totalMN);
 
         //calc all
         console.log(isoTime);
-        this.days[index].hm = isoTime;
-        this.days[index].decimalTime = ConvertTime.HourMin2Dec(Number(totalHR),Number(totalMN));
+        this.days[index].hhmm = isoTime;
+        this.days[index].decimalTime = ISOTime.ISO2Dec(isoTime);
         //TODO: Calc end totals
 
       } else {//TODO: give user notification
@@ -122,15 +120,13 @@ export class HomePage {
    */
   calcEndTotals(index: number) {
     if (this.oldTime[index]) {
-      this.time.decimal += this.oldTime[index];
-      this.time.hours = ConvertTime.Dec2Hour(this.time.decimal);
-      this.time.min = ConvertTime.Dec2Min(this.time.decimal);
+      this.time.decimal += ISOTime.ISO2Dec(this.oldTime[index]);
+      this.time.hhmm = ISOTime.addISO(this.time.hhmm, this.oldTime[index]);
     }
-    this.time.decimal -= this.days[index].decimalTime;
-    this.time.hours = ConvertTime.Dec2Hour(this.time.decimal);
-    this.time.min = ConvertTime.Dec2Min(this.time.decimal);
+    this.time.decimal -= ISOTime.ISO2Dec(this.days[index].hhmm);
+    this.time.hhmm = ISOTime.subISO(this.time.hhmm, this.days[index].hhmm);
 
-    this.oldTime[index] = this.days[index].decimalTime;
+    this.oldTime[index] = this.days[index].hhmm;
   }
 
 }
