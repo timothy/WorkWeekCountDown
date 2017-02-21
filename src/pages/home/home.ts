@@ -104,8 +104,10 @@ export class HomePage {
         console.log(isoTime);
         this.days[index].hhmm = isoTime;
         this.days[index].decimalTime = ISOTime.ISO2Dec(isoTime);
-        //TODO: Calc end totals
 
+        //Calc end totals
+        this.calcEndTotals(index);
+        
       } else {//TODO: give user notification
         this.days[index].endDate = null;
         this.days[index].startDate = null;
