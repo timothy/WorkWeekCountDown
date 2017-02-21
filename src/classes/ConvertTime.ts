@@ -1,7 +1,7 @@
 /**
  * Created by Timothy on 12/16/2016.
  */
-import {Validate} from "./NumValidator";
+//import {Validate} from "./NumValidator";// no longer needed - user input is validated in view now
 
 /**
  * Using this class to convert times will make it easier to change conversion formulas
@@ -9,8 +9,8 @@ import {Validate} from "./NumValidator";
  */
 export class ConvertTime {
 
- static readonly milliMin: number = 60 * 1000;
- static readonly milliHour: number = 60 * ConvertTime.milliMin;
+  static readonly milliMin: number = 60 * 1000;
+  static readonly milliHour: number = 60 * ConvertTime.milliMin;
 
   /**
    * This will convert hours and min from their millisecond form to decimal form
@@ -19,9 +19,9 @@ export class ConvertTime {
    * @returns {number} a decimal number that represents both minutes and hours
    * @constructor
    */
-  static HourMin2Dec(hours: number, min:number): number {
-    hours = Validate.Integer(hours);
-    min = Validate.Integer(min);
+  static HourMin2Dec(hours: number, min: number): number {
+    //hours = Validate.Integer(hours);// no longer needed - user input is validated in view now
+    //min = Validate.Integer(min);// no longer needed - user input is validated in view now
     return ((hours * this.milliHour) + (min * this.milliMin)) / this.milliHour;
   }
 
@@ -31,7 +31,7 @@ export class ConvertTime {
    * @returns {number} an amount of time that is represented by a decimal number
    * @constructor
    */
-  static MiliSec2Dec(milliSec: number):number {//todo add validation
+  static MiliSec2Dec(milliSec: number): number {//todo add validation
     return milliSec / this.milliHour;
   }
 
@@ -43,7 +43,7 @@ export class ConvertTime {
    * @constructor
    */
   static Dec2Hour(decimalTime: number): number {
-    decimalTime = Validate.Decimal(decimalTime);
+    //decimalTime = Validate.Decimal(decimalTime);// no longer needed - user input is validated in view now
     return Math.floor(decimalTime);
   }
 
@@ -55,10 +55,42 @@ export class ConvertTime {
    * @constructor
    */
   static Dec2Min(decimalTime: number): number {//TODO round to the nearest whole number...
-    decimalTime = Validate.Decimal(decimalTime);
+    //decimalTime = Validate.Decimal(decimalTime);// no longer needed - user input is validated in view now
     return Math.round((decimalTime - Math.floor(decimalTime)) * 60);//might want to start rounding to nearest min instead of dropping remainder...
 
     //or maybe: return Math.floor(decimalTime * 60) % 60;
     //or maybe: return Math.floor(((decimalTime * this.milliHour) % this.milliHour)/this.milliMin);
+  }
+
+  /**
+   *
+   * @param decimalTime {number} a decimal number that represents hours and min
+   * @returns {string} returns ISO time 'hh:mm' i.e. '05:09'
+   * @constructor
+   */
+  static Dec2IsoStrTime(decimalTime: number): string {
+    let hour: any = this.Dec2Hour(decimalTime);
+    let min: any = this.Dec2Min(decimalTime);
+
+    return this.HrMn2ISOFormat(hour, min);
+  }
+
+  /**
+   *
+   * @param hour the amount of hours. Needs to be either string number or number
+   * @param min the amount of min. Needs to be either string number or number
+   * @returns {string} returns ISO time 'hh:mm' i.e. '05:09'
+   * @constructor
+   */
+  static HrMn2ISOFormat(hour: any, min: any): string {
+    if (hour.toString().length === 1) {
+      hour = '0' + hour.toString();
+    }
+    //needs to be 2 digits
+    if (min.toString().length === 1) {
+      min = '0' + min.toString();
+    }
+
+    return hour + ':' + min;
   }
 }
