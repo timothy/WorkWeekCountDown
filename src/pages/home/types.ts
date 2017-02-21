@@ -3,8 +3,7 @@
  */
 interface TotalTime {
   decimal: number;
-  hours: number;
-  min: number;
+  hhmm: string;
 }
 
 interface DayTimeTracker {
@@ -15,4 +14,5 @@ interface DayTimeTracker {
   startDate?: Date;
   endDate?: Date;
 }
+
 export {TotalTime, DayTimeTracker}
