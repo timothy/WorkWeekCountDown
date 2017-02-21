@@ -5,7 +5,6 @@ import {TotalTime} from "./types";
 //import {Validate} from "../../classes/NumValidator";
 import {ConvertTime} from "../../classes/ConvertTime";
 
-enum T { hr, min }
 
 @Component({
   selector: 'page-home',
@@ -36,6 +35,8 @@ export class HomePage {
     //clear start and end times... does not make sense to keep them user manually inputs time amount
     this.days[index].endDate = null;
     this.days[index].startDate = null;
+
+
 
     console.log(this.days[index].decimalTime);
     console.log("this.days[index].decimalTime");
@@ -79,27 +80,29 @@ export class HomePage {
 
       console.log(start);
       console.log(end);
+      const hour = 0;
+      const min = 1;
       //if start time is less then end time
-      if (start[T.hr] < end[T.hr] || (start[T.hr] === end[T.hr] && start[T.min] < end[T.min])) {
+      if (start[hour] < end[hour] || (start[hour] === end[hour] && start[min] < end[min])) {
         console.log("++++++++++++++++++++++++++Validation***************************");
 
         //if start min is more then end min then one hour needs to be subtracted from end
-        if (end[T.hr] > start[T.hr] && end[T.min] < start[T.min]) {
-          totalHR = (end[T.hr] - 1) - start[T.hr];
-          totalMN = (end[T.min] + 60) - start[T.min];
+        if (end[hour] > start[hour] && end[min] < start[min]) {
+          totalHR = (end[hour] - 1) - start[hour];
+          totalMN = (end[min] + 60) - start[min];
         } else {
-          totalHR = end[T.hr] - start[T.hr];
-          totalMN = end[T.min] - start[T.min];
+          totalHR = end[hour] - start[hour];
+          totalMN = end[min] - start[min];
         }
 
         console.log(totalHR + ':' + totalMN);
         //needs to be 2 digits
         if (totalHR.toString().length === 1) {
-          totalHR = 0 + totalHR.toString();
+          totalHR = '0' + totalHR.toString();
         }
         //needs to be 2 digits
         if (totalMN.toString().length === 1) {
-          totalMN = 0 + totalMN.toString();
+          totalMN = '0' + totalMN.toString();
         }
 
         //calc all
