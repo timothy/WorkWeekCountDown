@@ -32,17 +32,19 @@ export class HomePage {
    * and will update all other field to reflect this new time
    */
   calcDecTime(index: number) {
-    //clear start and end times... does not make sense to keep them user manually inputs time amount
-    this.days[index].endDate = null;
-    this.days[index].startDate = null;
+    if(this.days[index].decimalTime || this.days[index].decimalTime === 0){
+      //clear start and end times... does not make sense to keep them user manually inputs time amount
+      this.days[index].endDate = null;
+      this.days[index].startDate = null;
 
-    this.days[index].hhmm = ISOTime.Dec2ISO(this.days[index].decimalTime);
+      this.days[index].hhmm = ISOTime.Dec2ISO(this.days[index].decimalTime);
 
-    console.log(this.days[index].decimalTime);
-    console.log("this.days[index].decimalTime");
+      console.log(this.days[index].decimalTime);
+      console.log("this.days[index].decimalTime");
 
-    //Calculate end totals with new subtracted amount
-    this.calcEndTotals(index);
+      //Calculate end totals with new subtracted amount
+      this.calcEndTotals(index);
+    }
   }
 
   /**
@@ -71,34 +73,19 @@ export class HomePage {
    * @param index the index of the day array that is to be edited
    */
   calcStartEndTime(index: number) {
-    let totalHR: any;
-    let totalMN: any;
-    let start: number[];
-    let end: number[];
-
+    //action is only taken when both a start work time and an end work time are provided
     if (this.days[index].startDate && this.days[index].endDate) {
+      let start: number[];
+      let end: number[];
+
       start = ISOTime.SplitTime(this.days[index].startDate);
       end = ISOTime.SplitTime(this.days[index].endDate);
-
-      console.log(start);
-      console.log(end);
 
       //if start time is less then end time
       if (start[T.hour] < end[T.hour] || (start[T.hour] === end[T.hour] && start[T.min] < end[T.min])) {
         console.log("++++++++++++++++++++++++++Validation***************************");
 
-        //if start min is more then end min then one hour needs to be subtracted from end
-        if (end[T.hour] > start[T.hour] && end[T.min] < start[T.min]) {
-          totalHR = (end[T.hour] - 1) - start[T.hour];
-          totalMN = (end[T.min] + 60) - start[T.min];
-        } else {
-          totalHR = end[T.hour] - start[T.hour];
-          totalMN = end[T.min] - start[T.min];
-        }
-
-        console.log(totalHR + ':' + totalMN);
-
-        let isoTime: string = ISOTime.HrMn2ISOFormat(totalHR, totalMN);
+        let isoTime: string = ISOTime.subISO(this.days[index].endDate, this.days[index].startDate);
 
         //calc all
         console.log(isoTime);
@@ -107,7 +94,7 @@ export class HomePage {
 
         //Calc end totals
         this.calcEndTotals(index);
-        
+
       } else {//TODO: give user notification
         this.days[index].endDate = null;
         this.days[index].startDate = null;
@@ -131,4 +118,25 @@ export class HomePage {
     this.oldTime[index] = this.days[index].hhmm;
   }
 
+  clearAll(){
+    this.days = [];
+    this.oldTime = [];
+    this.time = {decimal: 40, hhmm: '40:00'};
+    for (let i = 0; i < this.week; i++) {
+      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+      this.oldTime.push('');
+    }
+  }
 }
+
+/*
+//if start min is more then end min then one hour needs to be subtracted from end
+if (end[T.hour] > start[T.hour] && end[T.min] < start[T.min]) {
+  totalHR = (end[T.hour] - 1) - start[T.hour];
+  totalMN = (end[T.min] + 60) - start[T.min];
+} else {
+  totalHR = end[T.hour] - start[T.hour];
+  totalMN = end[T.min] - start[T.min];
+}
+
+console.log(totalHR + ':' + totalMN);*/
