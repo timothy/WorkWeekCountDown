@@ -2,8 +2,10 @@
  * Created by Timothy on 2/21/2017.
  */
 /**
- * this class is to handle hh:mm time format. This is a sub-category of ISO
- * and is meant to work with the ionic datetime component
+ * this class is to handle hh:mm time format and is meant to work with the ionic datetime component.
+ * I am using the datetime component to calculate time and not to show dates and times. In order
+ * to do this I have built this class to handle most of the needed time calculations that are not
+ * built into the ionic datetime component
  */
 export class ISOTime {
 
@@ -117,24 +119,52 @@ export class ISOTime {
     let time1: any[] = this.SplitTime(iso1);
     let time2: any[] = this.SplitTime(iso2);
 
-    let totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
-    let totalM = Number(time1[this.min]) + Number(time2[this.min]);
+    let totalH:number;
+    let totalM:number;
+
+    // 00:55 + 00:06 === 01:01 NOT 00:61
+    let positiveCondition:boolean = time1[this.min] + time2[this.min] >= 60;
+    // -05:-05 + 00:10 === -04:-55 NOT -05:05
+    let negativeCondition:boolean = time1[this.hour] + time2[this.hour] < 0 && time1[this.min] + time2[this.min] > 0;
+
+    if(positiveCondition || negativeCondition){
+      totalH = time1[this.hour] + time2[this.hour] + 1;
+      totalM = (time1[this.min] + time2[this.min]) - 60;
+    } else {
+       totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
+       totalM = Number(time1[this.min]) + Number(time2[this.min]);
+    }
 
     return this.HrMn2ISOFormat(totalH,totalM);
   }
 
   /**
    * subtracts two ISO times
-   * @param iso1
-   * @param iso2
+   * @param iso1 subtracting from
+   * @param iso2 the amount that will be subtracted
    * @returns {string} new ISO time string: remander of iso1 - iso2
    */
   static subISO(iso1: string, iso2: string): string {
     let time1: any[] = this.SplitTime(iso1);
     let time2: any[] = this.SplitTime(iso2);
 
-    let totalH = Number(time1[this.hour]) - Number(time2[this.hour]);
-    let totalM = Number(time1[this.min]) - Number(time2[this.min]);
+    let totalH;
+    let totalM;
+
+    //if number outcome is positive - if time2 min is more then time1 min then one hour needs to be subtracted and 60 min added
+    //if 01:50 - 00:55 === 00:55 NOT 01:-05
+    let positiveCondition:boolean = time1[this.min] < time2[this.min] && time1[this.hour] > 0;
+    //if 01:15 - 05:20 === 00:-55 NOT -01:-05
+    let negativeCondition:boolean = time1[this.min] - time2[this.min] <= -60 && time1[this.hour] - time2[this.hour] <= 0;
+
+   //account for 60 min time cycle
+    if (positiveCondition || negativeCondition) {
+      totalH = (time1[this.hour] - 1) - time2[this.hour];
+      totalM = (time1[this.min] + 60) - time2[this.min];
+    } else {
+      totalH = time1[this.hour] - time2[this.hour];
+      totalM = time1[this.min] - time2[this.min];
+    }
 
     return this.HrMn2ISOFormat(totalH,totalM);
   }
