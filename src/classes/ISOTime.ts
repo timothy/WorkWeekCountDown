@@ -72,7 +72,7 @@ export class ISOTime {
    * @returns {string} returns ISO time 'hh:mm' i.e. '05:09'
    * @constructor
    */
-  static HrMn2ISOFormat(hour: any, min: any): string {
+  static HrMn2ISOFormat(hour: any, min: any): string {//TODO need to create negative condition to handle -
     if (hour.toString().length === 1) {
       hour = '0' + hour.toString();
     }
@@ -129,7 +129,7 @@ export class ISOTime {
 
     if(positiveCondition || negativeCondition){
       totalH = time1[this.hour] + time2[this.hour] + 1;
-      totalM = (time1[this.min] + time2[this.min]) - 60;
+      totalM = (Number(time1[this.min]) + time2[this.min]) - 60;
     } else {
        totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
        totalM = Number(time1[this.min]) + Number(time2[this.min]);
@@ -145,11 +145,11 @@ export class ISOTime {
    * @returns {string} new ISO time string: remander of iso1 - iso2
    */
   static subISO(iso1: string, iso2: string): string {
-    let time1: any[] = this.SplitTime(iso1);
-    let time2: any[] = this.SplitTime(iso2);
+    let time1: number[] = this.SplitTime(iso1);
+    let time2: number[] = this.SplitTime(iso2);
 
-    let totalH;
-    let totalM;
+    let totalH:number;
+    let totalM:number;
 
     //if number outcome is positive - if time2 min is more then time1 min then one hour needs to be subtracted and 60 min added
     //if 01:50 - 00:55 === 00:55 NOT 01:-05
@@ -178,8 +178,15 @@ export class ISOTime {
    * if the time string changes in the future to hh-mm or anything else all we need
    * to do is change below code and changes will be reflected throughout the app.
    */
-  static SplitTime(iso: string): any[] {
-    return iso.split(":");
+  static SplitTime(iso: string): number[] {
+    let temp:any = iso.split(":");
+    let numArr:number[] = [];
+
+    //order matters... to avoid confusion omitted this.hour...
+    numArr.push(Number(temp[0]));
+    numArr.push(Number(temp[1]));
+
+    return numArr;
   }
 
 }
