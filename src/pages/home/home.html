@@ -8,7 +8,7 @@
 
 <ion-content padding>
   <ion-card *ngFor="let day of days">
-    <ion-card-header style="background-color: antiquewhite;">
+    <ion-card-header [ngStyle]="{'background-color':DOWColors[day.index]}">
       {{day.day}}
     </ion-card-header>
 
@@ -33,5 +33,7 @@
       </ion-item>
     </ion-list>
   </ion-card>
+
+  <button ion-button color="danger" (click)="clearAll()" block>Clear All</button>
 
 </ion-content>
