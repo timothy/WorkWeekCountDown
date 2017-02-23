@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
+import { AlertController } from 'ionic-angular';
 //
 import {TotalTime} from "./types";
 import {ISOTime} from "../../classes/ISOTime";
@@ -12,14 +13,17 @@ enum T {hour, min}//used when time is split
 })
 export class HomePage {
   readonly DOW: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  readonly DOWColors: string[] = ['#5ca793', '#f26722', '#1c65b2', '#0ba3c8', '#21af4b', '#8cc63e', '#ef8b2c'];
+
   readonly week: number = 7;
   oldTime: string[] = [];
+  styleCount:number = 0;
 
   //---variables below are used in the view---
-  days: Array<any> = [];
+  days: Array<any> = [];//TODO make type/interface for day so that I can make sure all usages will not break app
   time: TotalTime = {decimal: 40, hhmm: '40:00'};
 
-  constructor(public navCtrl: NavController) {
+  constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
     console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
@@ -96,6 +100,13 @@ export class HomePage {
         this.calcEndTotals(index);
 
       } else {//TODO: give user notification
+          let alert = this.alertCtrl.create({
+            title: 'Note:',
+            subTitle: 'Your starting time needs to be earlier than your ending Time.',
+            buttons: ['OK']
+          });
+          alert.present();
+
         this.days[index].endDate = null;
         this.days[index].startDate = null;
       }
@@ -126,6 +137,16 @@ export class HomePage {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
       this.oldTime.push('');
     }
+  }
+
+  setStyles(){
+  const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
+
+    let styles = {
+      'background-color': DOWColors[this.styleCount++]
+    };
+
+  return styles;
   }
 }
 
