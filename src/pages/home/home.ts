@@ -1,3 +1,4 @@
+//TODO - way to many edge case scenarios when using hour/min as a base time... Need to switch over to using decimal as base time.
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
