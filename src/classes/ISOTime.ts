@@ -34,7 +34,7 @@ export class ISOTime {
    * @constructor
    */
   static MiliSec2Dec(milliSec: number): number {//todo add validation
-    return milliSec / this.milliHour;
+    return Number(milliSec) / Number(this.milliHour);
   }
 
   /**
@@ -46,7 +46,8 @@ export class ISOTime {
    */
   static Dec2Hour(decimalTime: number): number {
     //decimalTime = Validate.Decimal(decimalTime);// no longer needed - user input is validated in view now
-    return Math.floor(decimalTime);
+    //return Math.floor(decimalTime);//this does not work with negative numbers...
+    return Math.trunc(decimalTime);
   }
 
   /**
@@ -58,10 +59,10 @@ export class ISOTime {
    */
   static Dec2Min(decimalTime: number): number {//TODO round to the nearest whole number...
     //decimalTime = Validate.Decimal(decimalTime);// no longer needed - user input is validated in view now
-    return Math.round((decimalTime - Math.floor(decimalTime)) * 60);//might want to start rounding to nearest min instead of dropping remainder...
+    return Math.round((Number(decimalTime) - Math.trunc(decimalTime)) * 60);//might want to start rounding to nearest min instead of dropping remainder...
 
-    //or maybe: return Math.floor(decimalTime * 60) % 60;
-    //or maybe: return Math.floor(((decimalTime * this.milliHour) % this.milliHour)/this.milliMin);
+    //or maybe: return Math.trunc(decimalTime * 60) % 60;
+    //or maybe: return Math.trunc(((decimalTime * this.milliHour) % this.milliHour)/this.milliMin);
   }
 
 
@@ -138,13 +139,13 @@ export class ISOTime {
     let totalM: number;
 
     // 00:55 + 00:06 === 01:01 NOT 00:61
-    let positiveCondition: boolean = time1[this.min] + time2[this.min] >= 60;
+    let positiveCondition: boolean = Number(time1[this.min]) + Number(time2[this.min]) >= 60;
     // -05:-05 + 00:10 === -04:-55 NOT -05:05
-    let negativeCondition: boolean = time1[this.hour] + time2[this.hour] < 0 && time1[this.min] + time2[this.min] > 0;
+    let negativeCondition: boolean = Number(time1[this.hour]) + Number(time2[this.hour]) < 0 && Number(time1[this.min]) + Number(time2[this.min]) > 0;
 
     if (positiveCondition || negativeCondition) {
-      totalH = time1[this.hour] + time2[this.hour] + 1;
-      totalM = (Number(time1[this.min]) + time2[this.min]) - 60;
+      totalH = Number(time1[this.hour]) + Number(time2[this.hour]) + 1;
+      totalM = (Number(time1[this.min]) + Number(time2[this.min])) - 60;
     } else {
       totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
       totalM = Number(time1[this.min]) + Number(time2[this.min]);
@@ -168,22 +169,22 @@ export class ISOTime {
 
     //if number outcome is positive - if time2 min is more then time1 min then one hour needs to be subtracted and 60 min added
     //if 01:50 - 00:55 === 00:55 NOT 01:-05
-    let positiveCondition: boolean = time1[this.min] < time2[this.min] && time1[this.hour] - time2[this.hour] > 0;
+    let positiveCondition: boolean = Number(time1[this.min]) < Number(time2[this.min]) && Number(time1[this.hour]) - Number(time2[this.hour]) > 0;
     //if 01:15 - 05:20 === 00:-55 NOT -01:-05
-    let negativeCondition: boolean = time1[this.min] - time2[this.min] <= -60 && time1[this.hour] - time2[this.hour] <= 0;
+    let negativeCondition: boolean = Number(time1[this.min]) - Number(time2[this.min]) <= -60 && Number(time1[this.hour]) - Number(time2[this.hour]) <= 0;
     // if 39:01 - 40:00 === 00:-01 NOT -01:01
-    let negativeCondition2: boolean = time1[this.min] > time2[this.min] && time1[this.hour] < time2[this.hour];
+    let negativeCondition2: boolean = Number(time1[this.min]) > Number(time2[this.min]) && Number(time1[this.hour]) < Number(time2[this.hour]);
 
     //account for 60 min time cycle
     if (positiveCondition || negativeCondition) {
-      totalH = (time1[this.hour] - 1) - time2[this.hour];
-      totalM = (time1[this.min] + 60) - time2[this.min];
+      totalH = (Number(time1[this.hour]) - 1) - Number(time2[this.hour]);
+      totalM = (Number(time1[this.min]) + 60) - Number(time2[this.min]);
     } else if (negativeCondition2) {
-      totalH = (time1[this.hour] + 1) - time2[this.hour];
-      totalM = (time1[this.min] - 60) - time2[this.min];
+      totalH = (Number(time1[this.hour]) + 1) - Number(time2[this.hour]);
+      totalM = (Number(time1[this.min]) - 60) - Number(time2[this.min]);
     } else {
-      totalH = time1[this.hour] - time2[this.hour];
-      totalM = time1[this.min] - time2[this.min];
+      totalH = Number(time1[this.hour]) - Number(time2[this.hour]);
+      totalM = Number(time1[this.min]) - Number(time2[this.min]);
     }
 
     return this.HrMn2ISOFormat(totalH, totalM);
