@@ -3,7 +3,7 @@ import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 //
-import {TotalTime} from "./types";
+import {TotalTime,DayTimeTracker} from "./types";
 import {ISOTime} from "../../classes/ISOTime";
 
 enum T {hour, min}//used when time is split
@@ -17,19 +17,19 @@ export class HomePage {
   readonly DOWColors: string[] = ['#5ca793', '#f26722', '#1c65b2', '#0ba3c8', '#21af4b', '#8cc63e', '#ef8b2c'];
 
   readonly week: number = 7;
-  oldTime: string[] = [];
+  oldTime: number[];
   styleCount:number = 0;
 
   //---variables below are used in the view---
-  days: Array<any> = [];//TODO make type/interface for day so that I can make sure all usages will not break app
+  days: Array<DayTimeTracker> = [];//TODO make type/interface for day so that I can make sure all usages will not break app
   time: TotalTime = {decimal: 40, hhmm: '40:00'};
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
-    console.log(navCtrl);
+    //console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
-      this.oldTime.push('');
     }
+    this.oldTime = new Array(this.week);
   }
 
   /**
@@ -121,13 +121,13 @@ export class HomePage {
    */
   calcEndTotals(index: number) {
     if (this.oldTime[index]) {
-      this.time.decimal += ISOTime.ISO2Dec(this.oldTime[index]);
-      this.time.hhmm = ISOTime.addISO(this.time.hhmm, this.oldTime[index]);
+      this.time.decimal += this.oldTime[index];
+      this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal);
     }
-    this.time.decimal -= ISOTime.ISO2Dec(this.days[index].hhmm);
-    this.time.hhmm = ISOTime.subISO(this.time.hhmm, this.days[index].hhmm);
+    this.time.decimal -= this.days[index].decimalTime;
+    this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal);
 
-    this.oldTime[index] = this.days[index].hhmm;
+    this.oldTime[index] = this.days[index].decimalTime;
   }
 
   clearAll(){
@@ -136,8 +136,8 @@ export class HomePage {
     this.time = {decimal: 40, hhmm: '40:00'};
     for (let i = 0; i < this.week; i++) {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
-      this.oldTime.push('');
     }
+    this.oldTime = new Array(this.week);
   }
 
   setStyles(){
@@ -150,15 +150,3 @@ export class HomePage {
   return styles;
   }
 }
-
-/*
-//if start min is more then end min then one hour needs to be subtracted from end
-if (end[T.hour] > start[T.hour] && end[T.min] < start[T.min]) {
-  totalHR = (end[T.hour] - 1) - start[T.hour];
-  totalMN = (end[T.min] + 60) - start[T.min];
-} else {
-  totalHR = end[T.hour] - start[T.hour];
-  totalMN = end[T.min] - start[T.min];
-}
-
-console.log(totalHR + ':' + totalMN);*/
