@@ -65,7 +65,6 @@ export class ISOTime {
   }
 
 
-
   /**
    * @param hour the amount of hours. Needs to be either string number or number
    * @param min the amount of min. Needs to be either string number or number
@@ -73,12 +72,28 @@ export class ISOTime {
    * @constructor
    */
   static HrMn2ISOFormat(hour: any, min: any): string {//TODO need to create negative condition to handle -
-    if (hour.toString().length === 1) {
-      hour = '0' + hour.toString();
+    hour = hour.toString();
+    min = min.toString();
+
+    //needs to be 2 digits - looks better
+    if (min.length === 1) {
+      min = '0' + min;
     }
-    //needs to be 2 digits
-    if (min.toString().length === 1) {
-      min = '0' + min.toString();
+
+    if (min[0] === '-' && min.length === 2) {
+      min = '0' + min[1];
+
+      if (hour[0] !== '-') {
+        hour = '-' + hour;
+      }
+    }
+
+    if (min[0] === '-' && min.length > 2) {
+      min = min.substring(1, min.length);
+
+      if (hour[0] !== '-') {
+        hour = '-' + hour;
+      }
     }
 
     return hour + ':' + min;
@@ -119,23 +134,23 @@ export class ISOTime {
     let time1: any[] = this.SplitTime(iso1);
     let time2: any[] = this.SplitTime(iso2);
 
-    let totalH:number;
-    let totalM:number;
+    let totalH: number;
+    let totalM: number;
 
     // 00:55 + 00:06 === 01:01 NOT 00:61
-    let positiveCondition:boolean = time1[this.min] + time2[this.min] >= 60;
+    let positiveCondition: boolean = time1[this.min] + time2[this.min] >= 60;
     // -05:-05 + 00:10 === -04:-55 NOT -05:05
-    let negativeCondition:boolean = time1[this.hour] + time2[this.hour] < 0 && time1[this.min] + time2[this.min] > 0;
+    let negativeCondition: boolean = time1[this.hour] + time2[this.hour] < 0 && time1[this.min] + time2[this.min] > 0;
 
-    if(positiveCondition || negativeCondition){
+    if (positiveCondition || negativeCondition) {
       totalH = time1[this.hour] + time2[this.hour] + 1;
       totalM = (Number(time1[this.min]) + time2[this.min]) - 60;
     } else {
-       totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
-       totalM = Number(time1[this.min]) + Number(time2[this.min]);
+      totalH = Number(time1[this.hour]) + Number(time2[this.hour]);
+      totalM = Number(time1[this.min]) + Number(time2[this.min]);
     }
 
-    return this.HrMn2ISOFormat(totalH,totalM);
+    return this.HrMn2ISOFormat(totalH, totalM);
   }
 
   /**
@@ -148,25 +163,30 @@ export class ISOTime {
     let time1: number[] = this.SplitTime(iso1);
     let time2: number[] = this.SplitTime(iso2);
 
-    let totalH:number;
-    let totalM:number;
+    let totalH: number;
+    let totalM: number;
 
     //if number outcome is positive - if time2 min is more then time1 min then one hour needs to be subtracted and 60 min added
     //if 01:50 - 00:55 === 00:55 NOT 01:-05
-    let positiveCondition:boolean = time1[this.min] < time2[this.min] && time1[this.hour] > 0;
+    let positiveCondition: boolean = time1[this.min] < time2[this.min] && time1[this.hour] - time2[this.hour] > 0;
     //if 01:15 - 05:20 === 00:-55 NOT -01:-05
-    let negativeCondition:boolean = time1[this.min] - time2[this.min] <= -60 && time1[this.hour] - time2[this.hour] <= 0;
+    let negativeCondition: boolean = time1[this.min] - time2[this.min] <= -60 && time1[this.hour] - time2[this.hour] <= 0;
+    // if 39:01 - 40:00 === 00:-01 NOT -01:01
+    let negativeCondition2: boolean = time1[this.min] > time2[this.min] && time1[this.hour] < time2[this.hour];
 
-   //account for 60 min time cycle
+    //account for 60 min time cycle
     if (positiveCondition || negativeCondition) {
       totalH = (time1[this.hour] - 1) - time2[this.hour];
       totalM = (time1[this.min] + 60) - time2[this.min];
+    } else if (negativeCondition2) {
+      totalH = (time1[this.hour] + 1) - time2[this.hour];
+      totalM = (time1[this.min] - 60) - time2[this.min];
     } else {
       totalH = time1[this.hour] - time2[this.hour];
       totalM = time1[this.min] - time2[this.min];
     }
 
-    return this.HrMn2ISOFormat(totalH,totalM);
+    return this.HrMn2ISOFormat(totalH, totalM);
   }
 
   /**
@@ -179,8 +199,8 @@ export class ISOTime {
    * to do is change below code and changes will be reflected throughout the app.
    */
   static SplitTime(iso: string): number[] {
-    let temp:any = iso.split(":");
-    let numArr:number[] = [];
+    let temp: any = iso.split(":");
+    let numArr: number[] = [];
 
     //order matters... to avoid confusion omitted this.hour...
     numArr.push(Number(temp[0]));
