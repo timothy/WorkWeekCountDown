@@ -11,6 +11,7 @@ export class ISOTime {
 
   static readonly hour: number = 0;
   static readonly min: number = 1;
+
   static readonly milliMin: number = 60 * 1000;
   static readonly milliHour: number = 60 * ISOTime.milliMin;
 
@@ -67,12 +68,13 @@ export class ISOTime {
 
 
   /**
+   * Designed to handle negative/positive numbers
    * @param hour the amount of hours. Needs to be either string number or number
    * @param min the amount of min. Needs to be either string number or number
    * @returns {string} returns ISO time 'hh:mm' i.e. '05:09'
    * @constructor
    */
-  static HrMn2ISOFormat(hour: any, min: any): string {//TODO need to create negative condition to handle -
+  static HrMn2ISOFormat(hour: any, min: any): string {
     hour = hour.toString();
     min = min.toString();
 
@@ -115,16 +117,27 @@ export class ISOTime {
   /**
    *
    * @param decimalTime {number} a decimal number that represents hours and min
+   * @param isEndTotal {boolean} if end totals then data needs to be parsed in hh:mm format
    * @returns {string} returns ISO time 'hh:mm' i.e. '05:09'
    * @constructor
    */
-  static Dec2ISO(decimalTime: number): string {
-    let hour: any = this.Dec2Hour(decimalTime);
-    let min: any = this.Dec2Min(decimalTime);
-
-    return this.HrMn2ISOFormat(hour, min);
+  static Dec2ISO(decimalTime: number, isEndTotal:boolean = false): string {
+    if(isEndTotal){
+      return this.HrMn2ISOFormat(this.Dec2Hour(decimalTime), this.Dec2Min(decimalTime))
+    }
+    return this.toFullISOstring(this.Dec2Hour(decimalTime), this.Dec2Min(decimalTime));
   }
 
+  static toFullISOstring(hr,min): string{
+    let d = new Date();
+    d.setUTCHours(Number(hr));
+    d.setUTCMinutes(Number(min));
+    d.setUTCSeconds(0);
+    d.setUTCMilliseconds(0);
+
+    //return this.HrMn2ISOFormat(hour, min);
+    return d.toISOString();
+  }
   /**
    * add two ISO times together
    * @param iso1
@@ -158,9 +171,10 @@ export class ISOTime {
    * subtracts two ISO times
    * @param iso1 subtracting from
    * @param iso2 the amount that will be subtracted
-   * @returns {string} new ISO time string: remander of iso1 - iso2
+   * @param isEndTotal {boolean} - true if you want a simple time string. False if you want full iso datetime string.
+   * @returns {string} new ISO time string: remainder of iso1 - iso2
    */
-  static subISO(iso1: string, iso2: string): string {
+  static subISO(iso1: string, iso2: string, isEndTotal:boolean = false): string {
     let time1: number[] = this.SplitTime(iso1);
     let time2: number[] = this.SplitTime(iso2);
 
@@ -187,7 +201,11 @@ export class ISOTime {
       totalM = Number(time1[this.min]) - Number(time2[this.min]);
     }
 
-    return this.HrMn2ISOFormat(totalH, totalM);
+    if(isEndTotal){
+      return this.HrMn2ISOFormat(totalH, totalM);
+    }
+
+    return this.toFullISOstring(totalH, totalM);
   }
 
   /**
@@ -200,7 +218,14 @@ export class ISOTime {
    * to do is change below code and changes will be reflected throughout the app.
    */
   static SplitTime(iso: string): number[] {
-    let temp: any = iso.split(":");
+    let temp;
+    if(iso.indexOf('T') !== -1){
+      temp = iso.split("T");
+      temp = temp[1].split(":");
+    }else{
+      temp = iso.split(":");
+    }
+
     let numArr: number[] = [];
 
     //order matters... to avoid confusion omitted this.hour...
@@ -209,5 +234,7 @@ export class ISOTime {
 
     return numArr;
   }
+
+
 
 }
