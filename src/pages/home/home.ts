@@ -20,7 +20,7 @@ export class HomePage {
   styleCount: number = 0;
 
   //---variables below are used in the view---
-  days: Array<DayTimeTracker> = [];//TODO make type/interface for day so that I can make sure all usages will not break app
+  days: Array<DayTimeTracker> = [];
   time: TotalTime = {decimal: Number(40), hhmm: '40:00'};
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
@@ -42,9 +42,6 @@ export class HomePage {
       this.days[index].startDate = null;
 
       this.days[index].hhmm = ISOTime.Dec2ISO(Number(this.days[index].decimalTime));
-
-      console.log(this.days[index].decimalTime);
-      console.log("this.days[index].decimalTime");
 
       //Calculate end totals with new subtracted amount
       this.calcEndTotals(index);
@@ -121,10 +118,10 @@ export class HomePage {
   calcEndTotals(index: number) {
     if (this.oldTime[index]) {
       this.time.decimal = Number(this.oldTime[index]) + Number(this.time.decimal);// having problems with this turing into a string and concatenating it...
-      this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal);
+      this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
     }
     this.time.decimal = Number(this.time.decimal) - Number(this.days[index].decimalTime);
-    this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal);
+    this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
 
     this.oldTime[index] = Number(this.days[index].decimalTime);
   }
