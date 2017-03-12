@@ -8,11 +8,11 @@ interface TotalTime {
 
 interface DayTimeTracker {
   day: string;
-  hm: string;
+  hhmm: string;
   decimalTime: number;
   index:number;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
 }
 
 export {TotalTime, DayTimeTracker}

@@ -1,9 +1,8 @@
-//TODO - way to many edge case scenarios when using hour/min as a base time... Need to switch over to using decimal as base time.
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
-import { AlertController } from 'ionic-angular';
+import {AlertController} from 'ionic-angular';
 //
-import {TotalTime} from "./types";
+import {TotalTime, DayTimeTracker} from "./types";
 import {ISOTime} from "../../classes/ISOTime";
 
 enum T {hour, min}//used when time is split
@@ -17,19 +16,19 @@ export class HomePage {
   readonly DOWColors: string[] = ['#5ca793', '#f26722', '#1c65b2', '#0ba3c8', '#21af4b', '#8cc63e', '#ef8b2c'];
 
   readonly week: number = 7;
-  oldTime: string[] = [];
-  styleCount:number = 0;
+  oldTime: number[];
+  styleCount: number = 0;
 
   //---variables below are used in the view---
-  days: Array<any> = [];//TODO make type/interface for day so that I can make sure all usages will not break app
-  time: TotalTime = {decimal: 40, hhmm: '40:00'};
+  days: Array<DayTimeTracker> = [];
+  time: TotalTime = {decimal: Number(40), hhmm: '40:00'};
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
-    console.log(navCtrl);
+    //console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
-      this.oldTime.push('');
     }
+    this.oldTime = new Array(this.week);
   }
 
   /**
@@ -37,15 +36,12 @@ export class HomePage {
    * and will update all other field to reflect this new time
    */
   calcDecTime(index: number) {
-    if(this.days[index].decimalTime || this.days[index].decimalTime === 0){
+    if (this.days[index].decimalTime || this.days[index].decimalTime === 0) {
       //clear start and end times... does not make sense to keep them user manually inputs time amount
       this.days[index].endDate = null;
       this.days[index].startDate = null;
 
-      this.days[index].hhmm = ISOTime.Dec2ISO(this.days[index].decimalTime);
-
-      console.log(this.days[index].decimalTime);
-      console.log("this.days[index].decimalTime");
+      this.days[index].hhmm = ISOTime.Dec2ISO(Number(this.days[index].decimalTime));
 
       //Calculate end totals with new subtracted amount
       this.calcEndTotals(index);
@@ -63,7 +59,7 @@ export class HomePage {
     this.days[index].endDate = null;
     this.days[index].startDate = null;
 
-    this.days[index].decimalTime = ISOTime.ISO2Dec(this.days[index].hhmm);
+    this.days[index].decimalTime = Number(ISOTime.ISO2Dec(this.days[index].hhmm));
 
     console.log(this.days[index].hhmm);
     console.log("this.days[index].hhmm");
@@ -90,7 +86,7 @@ export class HomePage {
       if (start[T.hour] < end[T.hour] || (start[T.hour] === end[T.hour] && start[T.min] < end[T.min])) {
         console.log("++++++++++++++++++++++++++Validation***************************");
 
-        let isoTime: string = ISOTime.subISO(this.days[index].endDate, this.days[index].startDate);
+        let isoTime: string = ISOTime.subISO(this.days[index].endDate, this.days[index].startDate);//should always result in a positive number
 
         //calc all
         console.log(isoTime);
@@ -101,12 +97,12 @@ export class HomePage {
         this.calcEndTotals(index);
 
       } else {//TODO: give user notification
-          let alert = this.alertCtrl.create({
-            title: 'Note:',
-            subTitle: 'Your starting time needs to be earlier than your ending Time.',
-            buttons: ['OK']
-          });
-          alert.present();
+        let alert = this.alertCtrl.create({
+          title: 'Note:',
+          subTitle: 'Your starting time needs to be earlier than your ending Time.',
+          buttons: ['OK']
+        });
+        alert.present();
 
         this.days[index].endDate = null;
         this.days[index].startDate = null;
@@ -121,44 +117,49 @@ export class HomePage {
    */
   calcEndTotals(index: number) {
     if (this.oldTime[index]) {
-      this.time.decimal += ISOTime.ISO2Dec(this.oldTime[index]);
-      this.time.hhmm = ISOTime.addISO(this.time.hhmm, this.oldTime[index]);
+      this.time.decimal = Number(this.oldTime[index]) + Number(this.time.decimal);// having problems with this turing into a string and concatenating it...
+      this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
     }
-    this.time.decimal -= ISOTime.ISO2Dec(this.days[index].hhmm);
-    this.time.hhmm = ISOTime.subISO(this.time.hhmm, this.days[index].hhmm);
+    this.time.decimal = Number(this.time.decimal) - Number(this.days[index].decimalTime);
+    this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
 
-    this.oldTime[index] = this.days[index].hhmm;
+    this.oldTime[index] = Number(this.days[index].decimalTime);
   }
 
-  clearAll(){
-    this.days = [];
-    this.oldTime = [];
-    this.time = {decimal: 40, hhmm: '40:00'};
-    for (let i = 0; i < this.week; i++) {
-      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
-      this.oldTime.push('');
-    }
+  clearAll() {
+    let confirm = this.alertCtrl.create({
+      title: 'Clear all data?',
+      message: 'Are you sure you want to clear all data?',
+      buttons: [
+        {
+          text: 'No',
+          handler: () => {
+            console.log('Disagree clicked');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.days = [];
+            this.oldTime = new Array(this.week);
+            this.time = {decimal: 40, hhmm: '40:00'};
+            for (let i = 0; i < this.week; i++) {
+              this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+            }
+          }
+        }
+      ]
+    });
+    confirm.present();
   }
 
-  setStyles(){
-  const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
+  setStyles() {
+    const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
 
     let styles = {
       'background-color': DOWColors[this.styleCount++]
     };
 
-  return styles;
+    return styles;
   }
 }
-
-/*
-//if start min is more then end min then one hour needs to be subtracted from end
-if (end[T.hour] > start[T.hour] && end[T.min] < start[T.min]) {
-  totalHR = (end[T.hour] - 1) - start[T.hour];
-  totalMN = (end[T.min] + 60) - start[T.min];
-} else {
-  totalHR = end[T.hour] - start[T.hour];
-  totalMN = end[T.min] - start[T.min];
-}
-
-console.log(totalHR + ':' + totalMN);*/
