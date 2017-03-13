@@ -17,6 +17,7 @@ export class HomePage {
 
   readonly week: number = 7;
   oldTime: number[];
+  lunchTime: number[];
   styleCount: number = 0;
 
   //---variables below are used in the view---
@@ -29,6 +30,7 @@ export class HomePage {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
     }
     this.oldTime = new Array(this.week);
+    this.lunchTime = new Array(this.week);
   }
 
   /**
@@ -96,7 +98,7 @@ export class HomePage {
         //Calc end totals
         this.calcEndTotals(index);
 
-      } else {//TODO: give user notification
+      } else {//Give user a notification and letting them know their times' do not make sense
         let alert = this.alertCtrl.create({
           title: 'Note:',
           subTitle: 'Your starting time needs to be earlier than your ending Time.',
@@ -108,6 +110,46 @@ export class HomePage {
         this.days[index].startDate = null;
       }
     }
+  }
+
+  subLunchTime(index){
+    let prompt = this.alertCtrl.create({
+      title: 'Subtract Lunch Break',
+      message: "Subtract lunch time from this days work.",
+      inputs: [
+        {
+          name: 'h',
+          placeholder: 'Hours'
+        },
+        {
+          name: 'm',
+          placeholder: 'Min'
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Save',
+          handler: data => {
+           if(this.days[index].decimalTime || this.days[index].decimalTime === 0){
+
+            }else {
+
+            }
+            console.log(index);
+            console.log(this.days[index].decimalTime);
+            console.log('Saved clicked');
+            console.log(data);
+          }
+        }
+      ]
+    });
+    prompt.present();
   }
 
 
