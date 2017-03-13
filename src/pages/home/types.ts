@@ -13,6 +13,7 @@ interface DayTimeTracker {
   index:number;
   startDate?: string;
   endDate?: string;
+  lunchTime?: number;
 }
 
 export {TotalTime, DayTimeTracker}
