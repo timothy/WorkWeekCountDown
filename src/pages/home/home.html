@@ -8,9 +8,13 @@
 
 <ion-content padding>
   <ion-card *ngFor="let day of days">
-    <ion-card-header [ngStyle]="{'background-color':DOWColors[day.index]}">
-      {{day.day}}
-    </ion-card-header>
+      <ion-toolbar color="dark">
+        <ion-title>{{day.day}}</ion-title>
+          <ion-chip text-right="true" ion-button (click)="subLunchTime(day.index)" style="">
+            <ion-label text-right="true" color="secondary">--Lunch</ion-label>
+          </ion-chip>
+      </ion-toolbar>
+
 
     <ion-list>
       <ion-item>
