@@ -27,7 +27,7 @@ export class HomePage {
   constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
     //console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
-      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i, lunchTime: {h: 0, m: 0}});
     }
     this.oldTime = new Array(this.week);
     this.lunchTime = new Array(this.week);
@@ -42,6 +42,18 @@ export class HomePage {
       //clear start and end times... does not make sense to keep them user manually inputs time amount
       this.days[index].endDate = null;
       this.days[index].startDate = null;
+
+      let lunchD: number = ISOTime.HourMin2Dec(this.days[index].lunchTime.h, this.days[index].lunchTime.m);
+
+      //Make sure lunch is a positive number
+      if (this.isLuanch(index)) {
+        //subtract Lunch time
+        this.days[index].decimalTime = this.days[index].decimalTime - lunchD;
+      }
+
+
+      //make sure lunch does not result in a negative work time
+      this.days[index].decimalTime = this.days[index].decimalTime > 0 ? this.days[index].decimalTime : 0;
 
       this.days[index].hhmm = ISOTime.Dec2ISO(Number(this.days[index].decimalTime));
 
@@ -60,6 +72,19 @@ export class HomePage {
     //clear start and end times... does not make sense to keep them user manually inputs time amount
     this.days[index].endDate = null;
     this.days[index].startDate = null;
+
+    let lunchD: number = ISOTime.HourMin2Dec(this.days[index].lunchTime.h, this.days[index].lunchTime.m);
+    let decTime: number = Number(ISOTime.ISO2Dec(this.days[index].hhmm));
+
+    //Make sure lunch is a positive number
+    if (this.isLuanch(index)) {
+      if (Number(decTime - lunchD) > 0) {
+        //subtract Lunch time
+        this.days[index].hhmm = ISOTime.Dec2ISO(Number(decTime - lunchD));
+      } else {
+        this.days[index].hhmm = ISOTime.Dec2ISO(0);
+      }
+    }
 
     this.days[index].decimalTime = Number(ISOTime.ISO2Dec(this.days[index].hhmm));
 
@@ -90,6 +115,19 @@ export class HomePage {
 
         let isoTime: string = ISOTime.subISO(this.days[index].endDate, this.days[index].startDate);//should always result in a positive number
 
+
+        let lunchD: number = ISOTime.HourMin2Dec(this.days[index].lunchTime.h, this.days[index].lunchTime.m);
+        let decTime: number = Number(ISOTime.ISO2Dec(isoTime));
+
+        //Make sure lunch is a positive number
+        if (this.isLuanch(index)) {
+          if (Number(decTime - lunchD) > 0) {
+            //subtract Lunch time
+            isoTime = ISOTime.Dec2ISO(Number(decTime - lunchD));
+          } else {
+            isoTime = ISOTime.Dec2ISO(0);
+          }
+        }
         //calc all
         console.log(isoTime);
         this.days[index].hhmm = isoTime;
@@ -112,7 +150,7 @@ export class HomePage {
     }
   }
 
-  subLunchTime(index){
+  subLunchTime(index) {
     let prompt = this.alertCtrl.create({
       title: 'Subtract Lunch Break',
       message: "Subtract lunch time from this days work.",
@@ -136,10 +174,12 @@ export class HomePage {
         {
           text: 'Save',
           handler: data => {
-           if(this.days[index].decimalTime || this.days[index].decimalTime === 0){
-
-            }else {
-
+            //Only calculate if user already added time
+            if (this.days[index].decimalTime || this.days[index].decimalTime === 0) {
+              this.days[index].lunchTime = data;
+              this.calcDecTime(index);
+            } else {
+              this.days[index].lunchTime = data;
             }
             console.log(index);
             console.log(this.days[index].decimalTime);
@@ -193,6 +233,18 @@ export class HomePage {
       ]
     });
     confirm.present();
+  }
+
+  /**
+   * Make sure lunch is a positive number
+   * @param index
+   * @returns {boolean}
+   */
+  isLuanch(index:number):boolean {
+    let lunchM: number = Number(this.days[index].lunchTime.m);
+    let lunchH: number = Number(this.days[index].lunchTime.h);
+
+    return (lunchH >= 0 && lunchM >= 0) && (lunchM > 0 || lunchH > 0);
   }
 
   setStyles() {
