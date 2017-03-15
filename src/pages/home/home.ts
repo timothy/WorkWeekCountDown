@@ -23,11 +23,13 @@ export class HomePage {
   //---variables below are used in the view---
   days: Array<DayTimeTracker> = [];
   time: TotalTime = {decimal: Number(40), hhmm: '40:00'};
+  LunchDisplay: string[] = [];
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
     //console.log(navCtrl);
     for (let i = 0; i < this.week; i++) {
       this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i, lunchTime: {h: 0, m: 0}});
+      this.LunchDisplay.push("Add Lunch");
     }
     this.oldTime = new Array(this.week);
     this.lunchTime = new Array(this.week);
@@ -181,6 +183,7 @@ export class HomePage {
             } else {
               this.days[index].lunchTime = data;
             }
+            this.LunchDisplay[index] = ISOTime.Dec2ISO(ISOTime.HourMin2Dec(data.h,data.m), true);
             console.log(index);
             console.log(this.days[index].decimalTime);
             console.log('Saved clicked');
@@ -240,10 +243,10 @@ export class HomePage {
    * @param index
    * @returns {boolean}
    */
-  isLuanch(index:number):boolean {
+  isLuanch(index: number): boolean {
     let lunchM: number = Number(this.days[index].lunchTime.m);
     let lunchH: number = Number(this.days[index].lunchTime.h);
-
+    
     return (lunchH >= 0 && lunchM >= 0) && (lunchM > 0 || lunchH > 0);
   }
 
