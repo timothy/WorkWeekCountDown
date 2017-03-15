@@ -10,8 +10,8 @@
   <ion-card *ngFor="let day of days">
       <ion-toolbar color="dark">
         <ion-title>{{day.day}}</ion-title>
-          <ion-chip text-right="true" ion-button (click)="subLunchTime(day.index)" style="">
-            <ion-label text-right="true" color="secondary">--Lunch</ion-label>
+          <ion-chip ion-button (click)="subLunchTime(day.index)" style="">
+            <ion-label color="secondary">{{LunchDisplay[day.index]}}</ion-label>
           </ion-chip>
       </ion-toolbar>
 
