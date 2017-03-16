@@ -128,6 +128,11 @@ export class ISOTime {
     return this.toFullISOstring(this.Dec2Hour(decimalTime), this.Dec2Min(decimalTime));
   }
 
+  /**
+   * @param hr the amount of hours. Needs to be either string number or number
+   * @param min the amount of min. Needs to be either string number or number
+   * @returns {string} A string in full ISO time format
+   */
   static toFullISOstring(hr,min): string{
     let d = new Date();
     d.setUTCHours(Number(hr));
@@ -135,7 +140,6 @@ export class ISOTime {
     d.setUTCSeconds(0);
     d.setUTCMilliseconds(0);
 
-    //return this.HrMn2ISOFormat(hour, min);
     return d.toISOString();
   }
   /**

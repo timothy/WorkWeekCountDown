@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
 import {AlertController} from 'ionic-angular';
 //
 import {TotalTime, DayTimeTracker} from "./types";
@@ -13,7 +12,6 @@ enum T {hour, min}//used when time is split
 })
 export class HomePage {
   readonly DOW: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  readonly DOWColors: string[] = ['#5ca793', '#f26722', '#1c65b2', '#0ba3c8', '#21af4b', '#8cc63e', '#ef8b2c'];
 
   readonly week: number = 7;
   oldTime: number[];
@@ -22,11 +20,18 @@ export class HomePage {
   //---variables below are used in the view---
   days: Array<DayTimeTracker> = [];
   time: TotalTime = {decimal: Number(40), hhmm: '40:00'};
+  LunchDisplay: string[] = [];
 
-  constructor(public navCtrl: NavController, public alertCtrl: AlertController) {
-    //console.log(navCtrl);
+  constructor(public alertCtrl: AlertController) {
     for (let i = 0; i < this.week; i++) {
-      this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+      this.days.push({
+        day: this.DOW[i],
+        hhmm: null,
+        decimalTime: null,
+        index: i,
+        lunchTime: {cur: 0, old: 0, timeChange: false}
+      });
+      this.LunchDisplay.push("Add Lunch");
     }
     this.oldTime = new Array(this.week);
   }
@@ -40,6 +45,10 @@ export class HomePage {
       //clear start and end times... does not make sense to keep them user manually inputs time amount
       this.days[index].endDate = null;
       this.days[index].startDate = null;
+
+
+      //make sure lunch does not result in a negative work time
+      this.days[index].decimalTime = this.days[index].decimalTime > 0 ? this.days[index].decimalTime : 0;
 
       this.days[index].hhmm = ISOTime.Dec2ISO(Number(this.days[index].decimalTime));
 
@@ -61,9 +70,6 @@ export class HomePage {
 
     this.days[index].decimalTime = Number(ISOTime.ISO2Dec(this.days[index].hhmm));
 
-    console.log(this.days[index].hhmm);
-    console.log("this.days[index].hhmm");
-
     //Calculate end totals with new subtracted amount
     this.calcEndTotals(index);
   }
@@ -84,19 +90,17 @@ export class HomePage {
 
       //if start time is less then end time
       if (start[T.hour] < end[T.hour] || (start[T.hour] === end[T.hour] && start[T.min] < end[T.min])) {
-        console.log("++++++++++++++++++++++++++Validation***************************");
 
         let isoTime: string = ISOTime.subISO(this.days[index].endDate, this.days[index].startDate);//should always result in a positive number
 
-        //calc all
-        console.log(isoTime);
+        //calc other fields
         this.days[index].hhmm = isoTime;
         this.days[index].decimalTime = ISOTime.ISO2Dec(isoTime);
 
         //Calc end totals
         this.calcEndTotals(index);
 
-      } else {//TODO: give user notification
+      } else {//Give user a notification and letting them know their times' do not make sense
         let alert = this.alertCtrl.create({
           title: 'Note:',
           subTitle: 'Your starting time needs to be earlier than your ending Time.',
@@ -110,6 +114,61 @@ export class HomePage {
     }
   }
 
+  /**
+   * Handles add lunch button logic
+   * @param index the index of the day array that is to be edited
+   */
+  addLunchTime(index: number) {
+    let prompt = this.alertCtrl.create({
+      title: 'Subtract Lunch Break',
+      message: "Subtract lunch time from total hours worked.",
+      inputs: [
+        {
+          name: 'h',
+          placeholder: 'Hours'
+        },
+        {
+          name: 'm',
+          placeholder: 'Min'
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            //Do nothing for now
+          }
+        },
+        {
+          text: 'Save',
+          handler: data => {
+            let lunchD: number = ISOTime.HourMin2Dec(data.h, data.m);
+
+            //Lunch needs to be a positive number
+            if (lunchD > 0) {
+              this.days[index].lunchTime.timeChange = true;//there are changes
+
+              // save state of old lunch before adding new time.
+              if (this.days[index].lunchTime.cur > 0) {
+                this.days[index].lunchTime.old = this.days[index].lunchTime.cur;
+              }
+
+              //Only calculate if user already added time
+              if (this.days[index].decimalTime || this.days[index].decimalTime === 0) {
+                this.days[index].lunchTime.cur = lunchD;
+                this.calcEndTotals(index);
+              } else {
+                this.days[index].lunchTime.cur = lunchD;
+              }
+              this.LunchDisplay[index] = ISOTime.Dec2ISO(lunchD, true);
+            }
+          }
+        }
+      ]
+    });
+    prompt.present();
+  }
+
 
   /**
    * Calculate end totals. If there is a previous amount then overwrite it with new amount
@@ -117,15 +176,31 @@ export class HomePage {
    */
   calcEndTotals(index: number) {
     if (this.oldTime[index]) {
-      this.time.decimal = Number(this.oldTime[index]) + Number(this.time.decimal);// having problems with this turing into a string and concatenating it...
-      this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
+      this.time.decimal = Number(this.oldTime[index]) + Number(this.time.decimal);// having problems with this turing into a string and concatenating it. To ovoid this problem used Number()
     }
+
+    //Factor in lunch time changes
+    if (this.days[index].lunchTime.timeChange) {
+      if (this.days[index].lunchTime.old > 0) {
+        this.time.decimal = Number(this.time.decimal) - Number(this.days[index].lunchTime.old);
+      }
+
+      if (this.days[index].lunchTime.cur > 0) {
+        this.time.decimal = Number(this.time.decimal) + Number(this.days[index].lunchTime.cur);
+      }
+      this.days[index].lunchTime.timeChange = false;//all changes complete
+    }
+
+
     this.time.decimal = Number(this.time.decimal) - Number(this.days[index].decimalTime);
     this.time.hhmm = ISOTime.Dec2ISO(this.time.decimal, true);
 
     this.oldTime[index] = Number(this.days[index].decimalTime);
   }
 
+  /**
+   * Clear all data fields and start over
+   */
   clearAll() {
     let confirm = this.alertCtrl.create({
       title: 'Clear all data?',
@@ -134,7 +209,7 @@ export class HomePage {
         {
           text: 'No',
           handler: () => {
-            console.log('Disagree clicked');
+            //console.log('Disagree clicked');
           }
         },
         {
@@ -143,8 +218,15 @@ export class HomePage {
             this.days = [];
             this.oldTime = new Array(this.week);
             this.time = {decimal: 40, hhmm: '40:00'};
+
             for (let i = 0; i < this.week; i++) {
-              this.days.push({day: this.DOW[i], hhmm: null, decimalTime: null, index: i});
+              this.days.push({
+                day: this.DOW[i],
+                hhmm: null,
+                decimalTime: null,
+                index: i,
+                lunchTime: {cur: 0, old: 0, timeChange: false}
+              });
             }
           }
         }
@@ -153,7 +235,8 @@ export class HomePage {
     confirm.present();
   }
 
-  setStyles() {
+  //This needs to be implemented to handle custom views and layouts for different devices
+/*  setStyles() {
     const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
 
     let styles = {
@@ -161,5 +244,5 @@ export class HomePage {
     };
 
     return styles;
-  }
+  }*/
 }
