@@ -10,7 +10,8 @@
   <ion-card *ngFor="let day of days">
       <ion-toolbar color="dark">
         <ion-title>{{day.day}}</ion-title>
-          <ion-chip ion-button (click)="subLunchTime(day.index)" style="top: 10px; right: 10px; position: absolute;">
+        <!--Note: the style="top: 10px; right: 10px; position: absolute;" will only work with android""-->
+          <ion-chip ion-button (click)="addLunchTime(day.index)" style="top: 10px; right: 10px; position: absolute;">
             <ion-label color="secondary">{{LunchDisplay[day.index]}}</ion-label>
           </ion-chip>
       </ion-toolbar>
