@@ -216,6 +216,7 @@ export class HomePage {
           text: 'Yes',
           handler: () => {
             this.days = [];
+            this.LunchDisplay = [];
             this.oldTime = new Array(this.week);
             this.time = {decimal: 40, hhmm: '40:00'};
 
@@ -227,6 +228,7 @@ export class HomePage {
                 index: i,
                 lunchTime: {cur: 0, old: 0, timeChange: false}
               });
+              this.LunchDisplay.push("Add Lunch");
             }
           }
         }
