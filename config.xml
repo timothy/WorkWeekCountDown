@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.tbradford.calc113876" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>calc</name>
-  <description>An awesome Ionic/Cordova app.</description>
+  <name>Work Time Tracker</name>
+  <description>Work Time Count Down Tracker.</description>
   <author email="tims.mobile.apps@gmail.com" href="https://github.com/timothy">Timothy B</author>
   <content src="index.html"/>
   <access origin="*"/>

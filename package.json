@@ -1,7 +1,7 @@
 {
-  "name": "ionic-hello-world",
-  "author": "Ionic Framework",
-  "homepage": "http://ionicframework.com/",
+  "name": "work-time-tracker",
+  "author": "Timothy B",
+  "homepage": "https://www.github.com/timothy",
   "private": true,
   "scripts": {
     "clean": "ionic-app-scripts clean",
@@ -40,5 +40,5 @@
     "ionic-plugin-keyboard"
   ],
   "cordovaPlatforms": [],
-  "description": "calc: An Ionic project"
+  "description": "calc: A work time tracker. Keep track time spent working during a 40 hr work week."
 }
