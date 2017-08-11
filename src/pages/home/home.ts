@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {AlertController} from 'ionic-angular';
 //
 import {TotalTime, DayTimeTracker} from "./types";
-import {ISOTime} from "../../classes/ISOTime";
+import {ISOTime} from "../classes/ISOTime";
 
 enum T {hour, min}//used when time is split
 
@@ -238,13 +238,13 @@ export class HomePage {
   }
 
   //This needs to be implemented to handle custom views and layouts for different devices
-/*  setStyles() {
-    const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
+  /*  setStyles() {
+      const DOWColors: string[] = ['#642e90', '#283591', '#1c65b2', '#0ba3c8', 'green', '#8cc63e', '#f3ec18'];
 
-    let styles = {
-      'background-color': DOWColors[this.styleCount++]
-    };
+      let styles = {
+        'background-color': DOWColors[this.styleCount++]
+      };
 
-    return styles;
-  }*/
+      return styles;
+    }*/
 }
